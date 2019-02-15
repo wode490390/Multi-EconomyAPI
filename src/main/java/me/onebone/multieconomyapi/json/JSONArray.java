@@ -1,4 +1,4 @@
-package me.onebone.economyapi.json;
+package me.onebone.multieconomyapi.json;
 
 /*
  Copyright (c) 2002 JSON.org
@@ -89,7 +89,7 @@ public class JSONArray implements Iterable<Object> {
      * Construct an empty JSONArray.
      */
     public JSONArray() {
-        this.myArrayList = new ArrayList<Object>();
+        this.myArrayList = new ArrayList<>();
     }
 
     /**
@@ -152,17 +152,18 @@ public class JSONArray implements Iterable<Object> {
      *            A Collection.
      */
     public JSONArray(Collection<?> collection) {
-        this.myArrayList = new ArrayList<Object>();
+        this.myArrayList = new ArrayList<>();
         if (collection != null) {
-        	for (Object o: collection){
-        		this.myArrayList.add(JSONObject.wrap(o));
-        	}
+            collection.forEach((o) -> {
+                this.myArrayList.add(JSONObject.wrap(o));
+            });
         }
     }
 
     /**
      * Construct a JSONArray from an array
      *
+     * @param array
      * @throws JSONException
      *             If not an array.
      */
@@ -241,7 +242,7 @@ public class JSONArray implements Iterable<Object> {
         try {
             return object instanceof Number ? ((Number) object).doubleValue()
                     : Double.parseDouble((String) object);
-        } catch (Exception e) {
+        } catch (NumberFormatException e) {
             throw new JSONException("JSONArray[" + index + "] is not a number.");
         }
     }
@@ -249,6 +250,7 @@ public class JSONArray implements Iterable<Object> {
     /**
     * Get the enum value associated with an index.
     * 
+    * @param <E>
     * @param clazz
     *            The type of enum to retrieve.
     * @param index
@@ -325,7 +327,7 @@ public class JSONArray implements Iterable<Object> {
         try {
             return object instanceof Number ? ((Number) object).intValue()
                     : Integer.parseInt((String) object);
-        } catch (Exception e) {
+        } catch (NumberFormatException e) {
             throw new JSONException("JSONArray[" + index + "] is not a number.");
         }
     }
@@ -381,7 +383,7 @@ public class JSONArray implements Iterable<Object> {
         try {
             return object instanceof Number ? ((Number) object).longValue()
                     : Long.parseLong((String) object);
-        } catch (Exception e) {
+        } catch (NumberFormatException e) {
             throw new JSONException("JSONArray[" + index + "] is not a number.");
         }
     }
@@ -486,7 +488,7 @@ public class JSONArray implements Iterable<Object> {
     public boolean optBoolean(int index, boolean defaultValue) {
         try {
             return this.getBoolean(index);
-        } catch (Exception e) {
+        } catch (JSONException e) {
             return defaultValue;
         }
     }
@@ -518,7 +520,7 @@ public class JSONArray implements Iterable<Object> {
     public double optDouble(int index, double defaultValue) {
         try {
             return this.getDouble(index);
-        } catch (Exception e) {
+        } catch (JSONException e) {
             return defaultValue;
         }
     }
@@ -550,7 +552,7 @@ public class JSONArray implements Iterable<Object> {
     public int optInt(int index, int defaultValue) {
         try {
             return this.getInt(index);
-        } catch (Exception e) {
+        } catch (JSONException e) {
             return defaultValue;
         }
     }
@@ -558,6 +560,7 @@ public class JSONArray implements Iterable<Object> {
     /**
      * Get the enum value associated with a key.
      * 
+     * @param <E>
      * @param clazz
      *            The type of enum to retrieve.
      * @param index
@@ -571,6 +574,7 @@ public class JSONArray implements Iterable<Object> {
     /**
      * Get the enum value associated with a key.
      * 
+     * @param <E>
      * @param clazz
      *            The type of enum to retrieve.
      * @param index
@@ -613,7 +617,7 @@ public class JSONArray implements Iterable<Object> {
     public BigInteger optBigInteger(int index, BigInteger defaultValue) {
         try {
             return this.getBigInteger(index);
-        } catch (Exception e) {
+        } catch (JSONException e) {
             return defaultValue;
         }
     }
@@ -632,7 +636,7 @@ public class JSONArray implements Iterable<Object> {
     public BigDecimal optBigDecimal(int index, BigDecimal defaultValue) {
         try {
             return this.getBigDecimal(index);
-        } catch (Exception e) {
+        } catch (JSONException e) {
             return defaultValue;
         }
     }
@@ -691,7 +695,7 @@ public class JSONArray implements Iterable<Object> {
     public long optLong(int index, long defaultValue) {
         try {
             return this.getLong(index);
-        } catch (Exception e) {
+        } catch (JSONException e) {
             return defaultValue;
         }
     }
@@ -760,7 +764,7 @@ public class JSONArray implements Iterable<Object> {
      * @return this.
      */
     public JSONArray put(double value) throws JSONException {
-        Double d = new Double(value);
+        Double d = value;
         JSONObject.testValidity(d);
         this.put(d);
         return this;
@@ -1037,10 +1041,11 @@ public class JSONArray implements Iterable<Object> {
      * @return a printable, displayable, transmittable representation of the
      *         array.
      */
+    @Override
     public String toString() {
         try {
             return this.toString(0);
-        } catch (Exception e) {
+        } catch (JSONException e) {
             return null;
         }
     }
@@ -1065,11 +1070,11 @@ public class JSONArray implements Iterable<Object> {
     }
 
     /**
-     * Write the contents of the JSONArray as JSON text to a writer. For
-     * compactness, no whitespace is added.
-     * <p>
+     * Write the contents of the JSONArray as JSON text to a writer.For
+     * compactness, no whitespace is added.<p>
      * Warning: This method assumes that the data structure is acyclical.
      *
+     * @param writer
      * @return The writer.
      * @throws JSONException
      */

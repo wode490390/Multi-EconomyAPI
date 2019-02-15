@@ -1,25 +1,25 @@
-name: EconomyAPI
-version: @VERSION@
+name: Multi-EconomyAPI
+version: "${pom.version}"
 author: onebone
 api: ["1.0.0"]
-main: me.onebone.economyapi.EconomyAPI
+main: me.onebone.multieconomyapi.MultiEconomyAPI
 
 permissions:
-  economyapi:
+  multieconomyapi:
     children:
-      economyapi.command:
+      multieconomyapi.command:
         children:
-          economyapi.command.mymoney:
+          multieconomyapi.command.mymoney:
             default: true
-          economyapi.command.topmoney:
+          multieconomyapi.command.topmoney:
             default: true
-          economyapi.command.seemoney:
+          multieconomyapi.command.seemoney:
             default: true
-          economyapi.command.givemoney:
+          multieconomyapi.command.givemoney:
             default: op
-          economyapi.command.takemoney:
+          multieconomyapi.command.takemoney:
             default: op
-          economyapi.command.pay:
+          multieconomyapi.command.pay:
             default: true
-          economyapi.command.setmoney:
+          multieconomyapi.command.setmoney:
             default: op

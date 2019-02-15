@@ -1,7 +1,7 @@
-package me.onebone.economyapi.task;
+package me.onebone.multieconomyapi.task;
 
 /*
- * EconomyAPI: Core of economy system for Nukkit
+ * MultiEconomyAPI: Core of economy system for Nukkit
  * Copyright (C) 2016  onebone <jyc00410@gmail.com>
  *
  * This program is free software: you can redistribute it and/or modify
@@ -17,17 +17,17 @@ package me.onebone.economyapi.task;
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-import me.onebone.economyapi.EconomyAPI;
-
 import cn.nukkit.scheduler.PluginTask;
+import me.onebone.multieconomyapi.MultiEconomyAPI;
 
-public class AutoSaveTask extends PluginTask<EconomyAPI>{
-	public AutoSaveTask(EconomyAPI owner){
-		super(owner);
-	}
-	
-	public void onRun(int currentTick){
-		((EconomyAPI)this.getOwner()).saveAll();
-	}
+public class AutoSaveTask extends PluginTask<MultiEconomyAPI> {
+
+    public AutoSaveTask(MultiEconomyAPI owner) {
+        super(owner);
+    }
+
+    @Override
+    public void onRun(int currentTick) {
+        this.getOwner().saveAll();
+    }
 }

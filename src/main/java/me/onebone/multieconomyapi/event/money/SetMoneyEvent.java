@@ -1,4 +1,4 @@
-package me.onebone.economyapi.event.account;
+package me.onebone.multieconomyapi.event.money;
 
 /*
  * EconomyAPI: Core of economy system for Nukkit
@@ -17,35 +17,35 @@ package me.onebone.economyapi.event.account;
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 import cn.nukkit.event.Cancellable;
 import cn.nukkit.event.Event;
 import cn.nukkit.event.HandlerList;
 
-public class CreateAccountEvent extends Event implements Cancellable{
-	public static HandlerList handlerList = new HandlerList();
-	
-	private String player;
-	private double defaultMoney;
-	
-	public CreateAccountEvent(String player, double defaultMoney){
-		this.player = player;
-		this.defaultMoney = defaultMoney;
-	}
-	
-	public String getPlayer(){
-		return this.player;
-	}
-	
-	public double getDefaultMoney(){
-		return this.defaultMoney;
-	}
-	
-	public void setDefaultMoney(double amount){
-		this.defaultMoney = amount;
-	}
-	
-	public static HandlerList getHandlers(){
-		return handlerList;
-	}
+public class SetMoneyEvent extends Event implements Cancellable {
+
+    public static HandlerList handlerList = new HandlerList();
+
+    private final String player;
+    private double amount;
+
+    public SetMoneyEvent(String player, double amount) {
+        this.player = player;
+        this.amount = amount;
+    }
+
+    public String getPlayer() {
+        return this.player;
+    }
+
+    public double getAmount() {
+        return this.amount;
+    }
+
+    public void setAmount(double amount) {
+        this.amount = amount;
+    }
+
+    public static HandlerList getHandlers() {
+        return handlerList;
+    }
 }

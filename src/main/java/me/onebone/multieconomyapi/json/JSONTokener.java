@@ -1,4 +1,4 @@
-package me.onebone.economyapi.json;
+package me.onebone.multieconomyapi.json;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -439,6 +439,7 @@ public class JSONTokener {
      *
      * @return " at {index} [character {character} line {line}]"
      */
+    @Override
     public String toString() {
         return " at " + this.index + " [character " + this.character + " line " +
             this.line + "]";
