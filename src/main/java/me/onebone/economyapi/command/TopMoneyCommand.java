@@ -18,8 +18,6 @@ package me.onebone.economyapi.command;
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -34,7 +32,7 @@ public class TopMoneyCommand extends Command{
 	private EconomyAPI plugin;
 	
 	public TopMoneyCommand(EconomyAPI plugin) {
-		super("topmoney", "Shows top money of this server", "/topmoney [page]");
+		super("topmoney", "Shows top money of this server", "/topmoney [page]", new String[]{"baltop"});
 		
 		this.plugin = plugin;
 	}
@@ -51,44 +49,32 @@ public class TopMoneyCommand extends Command{
 			final LinkedHashMap<String, Double> money = plugin.getAllMoney();
 			final Set<String> players = money.keySet();
 			final int page = args.length > 0 ? Math.max(1, Math.min(Integer.parseInt(args[0]), players.size())) : 1;
-			new Thread(){
-				public void run(){
-					List<String> list = new LinkedList<>();
-					for(String player:money.keySet()) list.add(player);
-					
-					Collections.sort(list, new Comparator<String>(){
-						@Override
-						public int compare(String s1, String s2) {
-							double one = money.get(s1);
-							double two = money.get(s2);
-							return one < two ? 1 : one > two ? -1 : 0;
-						}
-					});
-					
-					StringBuilder output = new StringBuilder();
-					output.append(plugin.getMessage("topmoney-tag", new String[]{Integer.toString(page), Integer.toString(((players.size() + 6) / 5))}, sender) + "\n");
-					
-					int duplicate = 0;
-					double prev = -1D;
-					for(int n = 0; n < list.size(); n++){
-						double m = money.get(list.get(n));
-						if(m == prev) duplicate++;
-						else duplicate = 0;
-						prev = m;
-						int current = (int)Math.ceil((double)(n + 1) / 5);
-						if(page == current){
-							output.append(plugin.getMessage("topmoney-format", new String[]{Integer.toString(n + 1 - duplicate), list.get(n), Double.toString(m)}, sender) + "\n");
-						}else if(page < current){
-							break;
-						}
-					}
-					output.substring(0, output.length() - 1);
-					
-					if(sender != null){
-						sender.sendMessage(output.toString());
+			sender.getServer().getScheduler().scheduleTask(() -> {
+				List<String> list = new LinkedList<>(money.keySet());
+
+				list.sort((s1, s2) -> Double.compare(money.get(s2), money.get(s1)));
+
+				StringBuilder output = new StringBuilder();
+				output.append(plugin.getMessage("topmoney-tag", new String[]{Integer.toString(page), Integer.toString(((players.size() + 6) / 5))}, sender)).append("\n");
+
+				int duplicate = 0;
+				double prev = -1D;
+				for(int n = 0; n < list.size(); n++){
+					double m = money.get(list.get(n));
+					if(m == prev) duplicate++;
+					else duplicate = 0;
+					prev = m;
+					int current = (int)Math.ceil((double)(n + 1) / 5);
+					if(page == current){
+						output.append(plugin.getMessage("topmoney-format", new String[]{Integer.toString(n + 1 - duplicate), list.get(n), Double.toString(m)}, sender)).append("\n");
+					}else if(page < current){
+						break;
 					}
 				}
-			}.start();
+				output.substring(0, output.length() - 1);
+
+				sender.sendMessage(output.toString());
+			});
 		}catch(NumberFormatException e){
 			sender.sendMessage(TextFormat.RED + "Please provide a number.");
 		}

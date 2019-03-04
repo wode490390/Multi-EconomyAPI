@@ -18,6 +18,8 @@ package me.onebone.economyapi.command;
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import cn.nukkit.command.data.CommandParamType;
+import cn.nukkit.command.data.CommandParameter;
 import me.onebone.economyapi.EconomyAPI;
 
 import cn.nukkit.command.Command;
@@ -31,6 +33,12 @@ public class SetLangCommand extends Command{
 		super("setlang", "Sets your preferred language", "/setlang <ccTLD>");
 		
 		this.plugin = plugin;
+
+		// command parameters
+		commandParameters.clear();
+		commandParameters.put("default", new CommandParameter[]{
+				new CommandParameter("ccTLD", CommandParamType.STRING, false)
+		});
 	}
 
 	@Override

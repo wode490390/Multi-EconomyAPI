@@ -28,6 +28,6 @@ public class AutoSaveTask extends PluginTask<EconomyAPI>{
 	}
 	
 	public void onRun(int currentTick){
-		((EconomyAPI)this.getOwner()).saveAll();
+		(this.getOwner()).saveAll();
 	}
 }

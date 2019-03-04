@@ -18,6 +18,8 @@ package me.onebone.economyapi.command;
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import cn.nukkit.command.data.CommandParamType;
+import cn.nukkit.command.data.CommandParameter;
 import me.onebone.economyapi.EconomyAPI;
 import cn.nukkit.Player;
 import cn.nukkit.command.Command;
@@ -31,6 +33,13 @@ public class TakeMoneyCommand extends Command{
 		super("takemoney", "Takes money from player", "/takemoney <player> <amount>");
 		
 		this.plugin = plugin;
+
+		// command parameters
+		commandParameters.clear();
+		commandParameters.put("default", new CommandParameter[]{
+				new CommandParameter("player", CommandParamType.TARGET, false),
+				new CommandParameter("amount", CommandParamType.FLOAT, false)
+		});
 	}
 
 	@Override
@@ -71,7 +80,7 @@ public class TakeMoneyCommand extends Command{
 				return true;
 			case EconomyAPI.RET_SUCCESS:
 				sender.sendMessage(this.plugin.getMessage("takemoney-took-money", new String[]{player, Double.toString(amount)}, sender));
-				if(p instanceof Player){
+				if(p != null){
 					p.sendMessage(this.plugin.getMessage("takemoney-money-taken", new String[]{Double.toString(amount)}, sender));
 				}
 				return true;

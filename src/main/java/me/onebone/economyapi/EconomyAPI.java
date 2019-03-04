@@ -26,7 +26,6 @@ import java.util.Optional;
 import java.util.UUID;
 
 import cn.nukkit.IPlayer;
-import cn.nukkit.Player;
 import cn.nukkit.event.EventHandler;
 import cn.nukkit.event.Listener;
 import cn.nukkit.event.player.PlayerJoinEvent;
@@ -39,10 +38,11 @@ import me.onebone.economyapi.event.account.CreateAccountEvent;
 import me.onebone.economyapi.event.money.AddMoneyEvent;
 import me.onebone.economyapi.event.money.ReduceMoneyEvent;
 import me.onebone.economyapi.event.money.SetMoneyEvent;
-import me.onebone.economyapi.json.JSONObject;
 import me.onebone.economyapi.provider.Provider;
 import me.onebone.economyapi.provider.YamlProvider;
 import me.onebone.economyapi.task.AutoSaveTask;
+import net.minidev.json.JSONObject;
+import net.minidev.json.JSONValue;
 
 public class EconomyAPI extends PluginBase implements Listener{
 	private static EconomyAPI instance;
@@ -280,8 +280,8 @@ public class EconomyAPI extends PluginBase implements Listener{
 		player = player.toLowerCase();
 		
 		JSONObject obj = this.language.get("def");
-		if(obj.has(key)){
-			String message = obj.getString(key);
+		if(obj.containsKey(key)){
+			String message = obj.getAsString(key);
 			
 			for(int i = 0; i < params.length; i++){
 				message = message.replace("%" + (i + 1), params[i]);
@@ -364,17 +364,16 @@ public class EconomyAPI extends PluginBase implements Listener{
 	}
 	
 	private void registerCommands(){
-		this.getServer().getCommandMap().register("mymoney", new MyMoneyCommand(this));
-		this.getServer().getCommandMap().register("topmoney", new TopMoneyCommand(this));
-		this.getServer().getCommandMap().register("seemoney", new SeeMoneyCommand(this));
-		this.getServer().getCommandMap().register("givemoney", new GiveMoneyCommand(this));
-		this.getServer().getCommandMap().register("takemoney", new TakeMoneyCommand(this));
-		this.getServer().getCommandMap().register("pay", new PayCommand(this));
-		this.getServer().getCommandMap().register("setmoney", new SetMoneyCommand(this));
+		this.getServer().getCommandMap().register("economy", new MyMoneyCommand(this));
+		this.getServer().getCommandMap().register("economy", new TopMoneyCommand(this));
+		this.getServer().getCommandMap().register("economy", new GiveMoneyCommand(this));
+		this.getServer().getCommandMap().register("economy", new TakeMoneyCommand(this));
+		this.getServer().getCommandMap().register("economy", new PayCommand(this));
+		this.getServer().getCommandMap().register("economy", new SetMoneyCommand(this));
 	}
 	
 	private boolean selectProvider(){
-		Class<?> providerClass = this.providerClass.get(((String)this.getConfig().get("data.provider", "yaml")).toLowerCase());
+		Class<?> providerClass = this.providerClass.get((this.getConfig().get("data.provider", "yaml")).toLowerCase());
 		
 		if(providerClass == null){
 			this.getLogger().critical("Invalid data provider was given.");
@@ -406,7 +405,7 @@ public class EconomyAPI extends PluginBase implements Listener{
 		for(String lang : langList){
 			InputStream is = this.getResource("lang_" + lang + ".json");
 			try {
-				JSONObject obj = new JSONObject(Utils.readFile(is));
+				JSONObject obj = (JSONObject) JSONValue.parse(Utils.readFile(is));
 				this.language.put(lang, obj);
 			} catch (IOException e) {
 				e.printStackTrace();
