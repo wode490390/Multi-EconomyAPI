@@ -18,142 +18,117 @@ package me.onebone.economyapi.provider;
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import java.io.File;
-import java.util.LinkedHashMap;
-import java.util.UUID;
-
-import cn.nukkit.Player;
 import cn.nukkit.utils.Config;
 
+import java.io.File;
+import java.util.LinkedHashMap;
+
 public class YamlProvider implements Provider {
-	private Config file = null;
-	private LinkedHashMap<String, Double> data = null;
-	
-	@SuppressWarnings({ "unchecked", "serial" })
-	public void init(File path){
-		file = new Config(new File(path, "Money.yml"), Config.YAML, new LinkedHashMap<String, Object>(){
-			{
-				put("version" , 2);
-				put("money", new LinkedHashMap<String, Double>());
-			}
-		});
-		
-		LinkedHashMap<Object, Object> temp = (LinkedHashMap<Object, Object>) file.get("money");
-		
-		data = new LinkedHashMap<>();
-		temp.forEach((key, money) -> {
-			String username = key.toString();
-			
-			if(money instanceof Integer){
-				data.put(username, ((Integer) money).doubleValue());
-			}else if(money instanceof Double){
-				data.put(username, (Double) money);
-			}else if(money instanceof String){
-				data.put(username, Double.parseDouble(money.toString()));
-			}
-		});
-	}
-	
-	public void open(){
-		
-	}
+    private Config file = null;
+    private LinkedHashMap<String, Double> data = null;
 
-	public void save(){
-		file.set("money", data);
-		file.save();
-	}
+    @Override
+    public void init(File path) {
+        file = new Config(new File(path, "Money.yml"), Config.YAML);
+        file.set("version", 2);
+        file.set("money", new LinkedHashMap<String, Double>());
 
-	public void close(){
-		this.save();
-		
-		file = null;
-		data = null;
-	}
+        LinkedHashMap<String, Object> temp = file.getSection("money");
 
-	@Override
-	public boolean accountExists(UUID player) {
-		return accountExists(player.toString());
-	}
+        data = new LinkedHashMap<>();
+        temp.forEach((username, money) -> {
+            if (money instanceof Integer) {
+                data.put(username, ((Integer) money).doubleValue());
+            } else if (money instanceof Double) {
+                data.put(username, (Double) money);
+            } else if (money instanceof String) {
+                data.put(username, Double.parseDouble(money.toString()));
+            }
+        });
+    }
 
-	@Override
-	public boolean accountExists(String player){
-		player = player.toLowerCase();
-		
-		return data.containsKey(player);
-	}
+    @Override
+    public void open() {
+        // nothing to do
+    }
 
-	@Override
-	public boolean removeAccount(UUID player) {
-		return removeAccount(player.toString());
-	}
+    @Override
+    public void save() {
+        file.set("money", data);
+        file.save();
+    }
 
-	@Override
-	public boolean removeAccount(String player) {
-		if (accountExists(player)) {
-			data.remove(player);
-			return true;
-		}
-		return false;
-	}
+    @Override
+    public void close() {
+        this.save();
 
-	@Override
-	public boolean createAccount(UUID player, double defaultMoney) {
-		if(!this.accountExists(player)){
-			data.put(player.toString(), defaultMoney);
-		}
-		return false;
-	}
+        file = null;
+        data = null;
+    }
 
-	@Override
-	public boolean setMoney(UUID player, double amount){
-		if(data.containsKey(player.toString())){
-			data.put(player.toString(), amount);
-			return true;
-		}
-		return false;
-	}
+    @Override
+    public boolean accountExists(String id) {
+        return data.containsKey(id);
+    }
+
+    @Override
+    public boolean removeAccount(String id) {
+        if (accountExists(id)) {
+            data.remove(id);
+            return true;
+        }
+        return false;
+    }
+
+    @Override
+    public boolean createAccount(String id, double defaultMoney) {
+        if (!this.accountExists(id)) {
+            data.put(id, defaultMoney);
+        }
+        return false;
+    }
+
+    @Override
+    public boolean setMoney(String id, double amount) {
+        if (data.containsKey(id)) {
+            data.put(id, amount);
+            return true;
+        }
+        return false;
+    }
 
 
-	@Override
-	public boolean addMoney(UUID player, double amount) {
-		if(data.containsKey(player.toString())){
-			data.put(player.toString(), data.get(player.toString()) + amount);
-			return true;
-		}
-		return false;
-	}
+    @Override
+    public boolean addMoney(String id, double amount) {
+        if (data.containsKey(id)) {
+            data.put(id, data.get(id) + amount);
+            return true;
+        }
+        return false;
+    }
 
-	@Override
-	public boolean reduceMoney(UUID player, double amount) {
-		if(data.containsKey(player.toString())){
-			data.put(player.toString(), data.get(player.toString()) - amount);
-			return true;
-		}
-		return false;
-	}
+    @Override
+    public boolean reduceMoney(String id, double amount) {
+        if (data.containsKey(id)) {
+            data.put(id, data.get(id) - amount);
+            return true;
+        }
+        return false;
+    }
 
-	@Override
-	public double getMoney(UUID player) {
-		if(data.containsKey(player.toString())){
-			return data.get(player.toString());
-		}
-		return -1;
-	}
+    @Override
+    public double getMoney(String id) {
+        if (data.containsKey(id)) {
+            return data.get(id);
+        }
+        return -1;
+    }
 
-	@Override
-	public double getMoney(String player){
-		player = player.toLowerCase();
-		if(data.containsKey(player)){
-			return data.get(player);
-		}
-		return -1;
-	}
-	
-	public LinkedHashMap<String, Double> getAll(){
-		return data;
-	}
-	
-	public String getName(){
-		return "Yaml";
-	}
+    public LinkedHashMap<String, Double> getAll() {
+        return data;
+    }
+
+    public String getName() {
+        return "Yaml";
+    }
 }

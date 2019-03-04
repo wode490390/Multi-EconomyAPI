@@ -18,21 +18,14 @@ package me.onebone.economyapi;
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.Optional;
-import java.util.UUID;
-
 import cn.nukkit.IPlayer;
+import cn.nukkit.command.CommandSender;
 import cn.nukkit.event.EventHandler;
 import cn.nukkit.event.Listener;
 import cn.nukkit.event.player.PlayerJoinEvent;
 import cn.nukkit.plugin.PluginBase;
-import cn.nukkit.utils.Utils;
 import cn.nukkit.utils.TextFormat;
-import cn.nukkit.command.CommandSender;
+import cn.nukkit.utils.Utils;
 import me.onebone.economyapi.command.*;
 import me.onebone.economyapi.event.account.CreateAccountEvent;
 import me.onebone.economyapi.event.money.AddMoneyEvent;
@@ -44,387 +37,413 @@ import me.onebone.economyapi.task.AutoSaveTask;
 import net.minidev.json.JSONObject;
 import net.minidev.json.JSONValue;
 
-public class EconomyAPI extends PluginBase implements Listener{
-	private static EconomyAPI instance;
-	
-	public static final int RET_NO_ACCOUNT = -3;
-	public static final int RET_CANCELLED = -2;
-	public static final int RET_NOT_FOUND = -1;
-	public static final int RET_INVALID = 0;
-	public static final int RET_SUCCESS = 1;
-	
-	private Provider provider;
-	private HashMap<String, JSONObject> language = null;
-	private HashMap<String, Class<?>> providerClass = new HashMap<>();
-	
-	private String[] langList = new String[]{
-		"ch", "cs", "def", "fr", "id", "it", "jp", "ko", "nl", "ru", "zh"	
-	};
-	
-	public static EconomyAPI getInstance(){
-		return instance;
-	}
-	
-	public boolean createAccount(IPlayer player){
-		return this.createAccount(player, -1, false);
-	}
-	
-	public boolean createAccount(IPlayer player, double defaultMoney){
-		return this.createAccount(player, defaultMoney, false);
-	}
-	
-	public boolean createAccount(IPlayer player, double defaultMoney, boolean force){
-		return this.createAccount(player.getUniqueId(), defaultMoney, force);
-	}
-	
-	public boolean createAccount(UUID player, double defaultMoney, boolean force){
-		CreateAccountEvent event = new CreateAccountEvent(player, defaultMoney);
-		this.getServer().getPluginManager().callEvent(event);
-		if(!event.isCancelled() || force){
-			defaultMoney = event.getDefaultMoney() == -1D ? this.getDefaultMoney() : event.getDefaultMoney();
-			return this.provider.createAccount(player, defaultMoney);
-		}
-		return false;
-	}
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.Optional;
+import java.util.UUID;
 
-	public boolean createAccount(String player, double defaultMoney, boolean force) {
-		Optional<UUID> uuid = getServer().lookupName(player);
-		return uuid.filter(uuid1 -> createAccount(uuid1, defaultMoney, force)).isPresent();
-	}
-	
-	public LinkedHashMap<String, Double> getAllMoney(){
-		return this.provider.getAll();
-	}
-	
-	/**
-	 * Returns money of player
-	 * 
-	 * @param player
-	 * @return Money of player. -1 if player does not exist.
-	 */
-	public double myMoney(IPlayer player){
-		checkAndConvertLegacy(player.getUniqueId(), player.getName());
-		return this.myMoney(player.getUniqueId());
-	}
+public class EconomyAPI extends PluginBase implements Listener {
+    public static final int RET_NO_ACCOUNT = -3;
+    public static final int RET_CANCELLED = -2;
+    public static final int RET_NOT_FOUND = -1;
+    public static final int RET_INVALID = 0;
+    public static final int RET_SUCCESS = 1;
+    private static EconomyAPI instance;
+    private Provider provider;
+    private HashMap<String, JSONObject> language = null;
+    private HashMap<String, Class<?>> providerClass = new HashMap<>();
 
-	public double myMoney(UUID player) {
-		return this.provider.getMoney(player);
-	}
-	
-	public double myMoney(String player){
-		Optional<UUID> uuid = getServer().lookupName(player);
-		if (uuid.isPresent()) {
-			checkAndConvertLegacy(uuid.get(), player);
-			return myMoney(uuid.get());
-		}
-		player = player.toLowerCase();
-		
-		return this.provider.getMoney(player);
-	}
-	
-	public int setMoney(IPlayer player, double amount){
-		return this.setMoney(player, amount, false);
-	}
-	
-	public int setMoney(IPlayer player, double amount, boolean force){
-		checkAndConvertLegacy(player.getUniqueId(), player.getName());
-		return this.setMoney(player.getUniqueId(), amount, force);
-	}
+    private String[] langList = new String[]{
+            "ch", "cs", "def", "fr", "id", "it", "jp", "ko", "nl", "ru", "zh"
+    };
 
-	public int setMoney(UUID player, double amount, boolean force) {
-		if(amount < 0){
-			return RET_INVALID;
-		}
+    public static EconomyAPI getInstance() {
+        return instance;
+    }
 
-		SetMoneyEvent event = new SetMoneyEvent(player, amount);
-		this.getServer().getPluginManager().callEvent(event);
-		if(!event.isCancelled() || force){
-			if(this.provider.accountExists(player)){
-				amount = event.getAmount();
+    public boolean createAccount(IPlayer player) {
+        return this.createAccount(player, -1, false);
+    }
 
-				if(amount <= this.getMaxMoney()){
-					this.provider.setMoney(player, amount);
-					return RET_SUCCESS;
-				}else{
-					return RET_INVALID;
-				}
-			}else{
-				return RET_NO_ACCOUNT;
-			}
-		}
-		return RET_CANCELLED;
-	}
+    public boolean createAccount(IPlayer player, double defaultMoney) {
+        return this.createAccount(player, defaultMoney, false);
+    }
 
-	@Deprecated
-	public int setMoney(String player, double amount){
-		return this.setMoney(player, amount, false);
-	}
+    public boolean createAccount(IPlayer player, double defaultMoney, boolean force) {
+        return this.createAccount(player.getUniqueId(), defaultMoney, force);
+    }
 
-	@Deprecated
-	public int setMoney(String player, double amount, boolean force){
-		Optional<UUID> uuid = getServer().lookupName(player);
-		if (uuid.isPresent()) {
-			checkAndConvertLegacy(uuid.get(), player);
-			return setMoney(uuid.get(), amount, force);
-		}
-		return RET_INVALID;
-	}
-	
-	public int addMoney(IPlayer player, double amount){
-		return this.addMoney(player, amount, false);
-	}
-	
-	public int addMoney(IPlayer player, double amount, boolean force){
-		checkAndConvertLegacy(player.getUniqueId(), player.getName());
-		return this.addMoney(player.getUniqueId(), amount, force);
-	}
+    public boolean createAccount(UUID id, double defaultMoney) {
+        return this.createAccount(id, defaultMoney, false);
+    }
 
-	public int addMoney(UUID player, double amount) {
-		return addMoney(player, amount, false);
-	}
+    public boolean createAccount(UUID id, double defaultMoney, boolean force) {
+        return createAccount(id.toString(), defaultMoney, force);
+    }
 
-	public int addMoney(UUID player, double amount, boolean force) {
-		if(amount < 0){
-			return RET_INVALID;
-		}
+    public boolean createAccount(String id, double defaultMoney, boolean force) {
+        Optional<UUID> uuid = getServer().lookupName(id);
+        return uuid.map(uuid1 -> createAccount(uuid1, defaultMoney, force))
+                .orElse(createAccountInternal(id, defaultMoney, force));
+    }
 
-		AddMoneyEvent event = new AddMoneyEvent(player, amount);
-		this.getServer().getPluginManager().callEvent(event);
-		if(!event.isCancelled() || force){
-			amount = event.getAmount();
+    private boolean createAccountInternal(String id, double defaultMoney, boolean force) {
+        CreateAccountEvent event = new CreateAccountEvent(id, defaultMoney);
+        this.getServer().getPluginManager().callEvent(event);
+        if (!event.isCancelled() || force) {
+            defaultMoney = event.getDefaultMoney() == -1D ? this.getDefaultMoney() : event.getDefaultMoney();
+            return this.provider.createAccount(id, defaultMoney);
+        }
+        return false;
+    }
 
-			double money;
-			if((money = this.provider.getMoney(player)) != -1){
-				if(money + amount > this.getMaxMoney()){
-					return RET_INVALID;
-				}else{
-					this.provider.addMoney(player, amount);
-					return RET_SUCCESS;
-				}
-			}else{
-				return RET_NO_ACCOUNT;
-			}
-		}
-		return RET_CANCELLED;
-	}
+    public LinkedHashMap<String, Double> getAllMoney() {
+        return this.provider.getAll();
+    }
 
-	@Deprecated
-	public int addMoney(String player, double amount){
-		return this.addMoney(player, amount, false);
-	}
+    /**
+     * Returns money of player
+     *
+     * @param player
+     * @return Money of player. -1 if player does not exist.
+     */
+    public double myMoney(IPlayer player) {
+        checkAndConvertLegacy(player.getUniqueId(), player.getName());
+        return this.myMoney(player.getUniqueId());
+    }
 
-	@Deprecated
-	public int addMoney(String player, double amount, boolean force){
-		Optional<UUID> uuid = getServer().lookupName(player);
-		if (uuid.isPresent()) {
-			checkAndConvertLegacy(uuid.get(), player);
-			return addMoney(uuid.get(), amount, force);
-		}
-		return RET_INVALID;
-	}
-	
-	public int reduceMoney(IPlayer player, double amount){
-		return this.reduceMoney(player, amount, false);
-	}
-	
-	public int reduceMoney(IPlayer player, double amount, boolean force){
-		checkAndConvertLegacy(player.getUniqueId(), player.getName());
-		return this.reduceMoney(player.getUniqueId(), amount, force);
-	}
+    public double myMoney(UUID id) {
+        return myMoneyInternal(id.toString());
+    }
 
-	public int reduceMoney(UUID player, double amount){
-		return this.reduceMoney(player, amount, false);
-	}
+    public double myMoney(String id) {
+        Optional<UUID> uuid = getServer().lookupName(id);
+        if (uuid.isPresent()) {
+            checkAndConvertLegacy(uuid.get(), id);
+            return myMoney(uuid.get());
+        }
+        return myMoneyInternal(id);
+    }
 
-	public int reduceMoney(UUID player, double amount, boolean force) {
-		if(amount < 0){
-			return RET_INVALID;
-		}
+    private double myMoneyInternal(String id) {
+        return this.provider.getMoney(id.toLowerCase());
+    }
 
-		ReduceMoneyEvent event = new ReduceMoneyEvent(player, amount);
-		this.getServer().getPluginManager().callEvent(event);
-		if(!event.isCancelled() || force){
-			amount = event.getAmount();
+    public int setMoney(IPlayer player, double amount) {
+        return this.setMoney(player, amount, false);
+    }
 
-			double money;
-			if((money = this.provider.getMoney(player)) != -1){
-				if(money - amount < 0){
-					return RET_INVALID;
-				}else{
-					this.provider.reduceMoney(player, amount);
-					return RET_SUCCESS;
-				}
-			}else{
-				return RET_NO_ACCOUNT;
-			}
-		}
-		return RET_CANCELLED;
-	}
+    public int setMoney(IPlayer player, double amount, boolean force) {
+        checkAndConvertLegacy(player.getUniqueId(), player.getName());
+        return this.setMoney(player.getUniqueId(), amount, force);
+    }
 
-	@Deprecated
-	public int reduceMoney(String player, double amount){
-		return this.reduceMoney(player, amount, false);
-	}
+    public int setMoney(UUID id, double amount) {
+        return setMoney(id, amount, false);
+    }
 
-	@Deprecated
-	public int reduceMoney(String player, double amount, boolean force){
-		Optional<UUID> uuid = getServer().lookupName(player);
-		if (uuid.isPresent()) {
-			checkAndConvertLegacy(uuid.get(), player);
-			return reduceMoney(uuid.get(), amount, force);
-		}
-		return RET_INVALID;
-	}
-	
-	public String getMessage(String key, String[] params, String player){ // TODO: Individual language
-		player = player.toLowerCase();
-		
-		JSONObject obj = this.language.get("def");
-		if(obj.containsKey(key)){
-			String message = obj.getAsString(key);
-			
-			for(int i = 0; i < params.length; i++){
-				message = message.replace("%" + (i + 1), params[i]);
-			}
-			return TextFormat.colorize(message.replace("%MONETARY_UNIT%", this.getMonetaryUnit()));
-		}
-		return "There are no message with key \"" + key + "\"";
-	}
-	
-	public String getMessage(String key, String sender){
-		return this.getMessage(key, new String[]{}, sender);
-	}
-	
-	public String getMessage(String key, CommandSender sender){
-		return this.getMessage(key, new String[]{}, sender);
-	}
-	
-	public String getMessage(String key, String[] params, CommandSender player){
-		return this.getMessage(key, params, player.getName());
-	}
-	
-	public String getMonetaryUnit(){
-		return this.getConfig().get("money.monetary-unit", "$");
-	}
-	
-	public double getDefaultMoney(){
-		if(this.getConfig().isDouble("money.default")){
-			return this.getConfig().get("money.default", 1000D);
-		}else if(this.getConfig().isLong("money.default")){
-			return this.getConfig().getLong("money.default", 1000);
-		}
-		return 1000;
-	}
-	
-	public double getMaxMoney(){
-		if(this.getConfig().isDouble("money.max")){
-			return this.getConfig().get("money.max", 9999999999D);
-		}else if(this.getConfig().isLong("money.max")){
-			return this.getConfig().getLong("money.max", 9999999999L);
-		}
-		return 9999999999D;
-	}
-	
-	public void saveAll(){
-		if(this.provider instanceof Provider){
-			this.provider.save();
-		}
-	}
-	
-	public void onLoad(){
-		instance = this;
-		
-		this.addProvider("yaml", YamlProvider.class);
-	}
-	
-	public void onEnable(){
-		this.saveDefaultConfig();
-		
-		boolean success = this.initialize();
-		
-		if(success){
-			this.getServer().getPluginManager().registerEvents(this, this);
-			this.getServer().getScheduler().scheduleDelayedRepeatingTask(new AutoSaveTask(this), this.getConfig().get("data.auto-save-interval", 10) * 1200, this.getConfig().get("data.auto-save-interval", 10) * 1200);
-		}
-	}
-	
-	@EventHandler
-	public void onJoin(PlayerJoinEvent event){
-		this.createAccount(event.getPlayer());
-	}
-	
-	public void onDisable(){
-		this.saveAll();
-	}
-	
-	private boolean initialize(){
-		this.importLanguages();
-		this.registerCommands();
-		return this.selectProvider();
-	}
-	
-	private void registerCommands(){
-		this.getServer().getCommandMap().register("economy", new MyMoneyCommand(this));
-		this.getServer().getCommandMap().register("economy", new TopMoneyCommand(this));
-		this.getServer().getCommandMap().register("economy", new GiveMoneyCommand(this));
-		this.getServer().getCommandMap().register("economy", new TakeMoneyCommand(this));
-		this.getServer().getCommandMap().register("economy", new PayCommand(this));
-		this.getServer().getCommandMap().register("economy", new SetMoneyCommand(this));
-	}
-	
-	private boolean selectProvider(){
-		Class<?> providerClass = this.providerClass.get((this.getConfig().get("data.provider", "yaml")).toLowerCase());
-		
-		if(providerClass == null){
-			this.getLogger().critical("Invalid data provider was given.");
-			return false;
-		}
-		
-		try {
-			this.provider = (Provider) providerClass.newInstance();
-			this.provider.init(this.getDataFolder());
-		} catch (InstantiationException | IllegalAccessException e) {
-			this.getLogger().critical("Invalid data provider was given.");
-			return false;
-		}
-		
-		this.provider.open();
-		
-		this.getLogger().notice("Data provider was set to: "+provider.getName());
-		return true;
-	}
-	
-	public boolean addProvider(String name, Class<? extends Provider> providerClass){
-		this.providerClass.put(name, providerClass);
-		return true;
-	}
-	
-	private void importLanguages(){
-		this.language = new HashMap<>();
-		
-		for(String lang : langList){
-			InputStream is = this.getResource("lang_" + lang + ".json");
-			try {
-				JSONObject obj = (JSONObject) JSONValue.parse(Utils.readFile(is));
-				this.language.put(lang, obj);
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-		}
-	}
+    public int setMoney(UUID id, double amount, boolean force) {
+        return setMoneyInternal(id.toString(), amount, force);
+    }
 
-	private void checkAndConvertLegacy(UUID uuid, String name) {
-		if (!provider.accountExists(name)) {
-			return;
-		}
+    public int setMoney(String id, double amount) {
+        return this.setMoney(id, amount, false);
+    }
 
-		if (provider.accountExists(uuid)) {
-			provider.removeAccount(name);
-			return;
-		}
+    public int setMoney(String id, double amount, boolean force) {
+        Optional<UUID> uuid = getServer().lookupName(id);
+        if (uuid.isPresent()) {
+            checkAndConvertLegacy(uuid.get(), id);
+            return setMoney(uuid.get(), amount, force);
+        }
+        return setMoneyInternal(id, amount, force);
+    }
 
-		double money = provider.getMoney(name);
-		provider.createAccount(uuid, money);
-		provider.removeAccount(name);
-	}
+    private int setMoneyInternal(String id, double amount, boolean force) {
+        id = id.toLowerCase();
+        if (amount < 0) {
+            return RET_INVALID;
+        }
+
+        SetMoneyEvent event = new SetMoneyEvent(id, amount);
+        this.getServer().getPluginManager().callEvent(event);
+        if (!event.isCancelled() || force) {
+            if (this.provider.accountExists(id)) {
+                amount = event.getAmount();
+
+                if (amount <= this.getMaxMoney()) {
+                    this.provider.setMoney(id, amount);
+                    return RET_SUCCESS;
+                } else {
+                    return RET_INVALID;
+                }
+            } else {
+                return RET_NO_ACCOUNT;
+            }
+        }
+        return RET_CANCELLED;
+    }
+
+    public int addMoney(IPlayer player, double amount) {
+        return this.addMoney(player, amount, false);
+    }
+
+    public int addMoney(IPlayer player, double amount, boolean force) {
+        checkAndConvertLegacy(player.getUniqueId(), player.getName());
+        return this.addMoney(player.getUniqueId(), amount, force);
+    }
+
+    public int addMoney(UUID id, double amount) {
+        return addMoney(id, amount, false);
+    }
+
+    public int addMoney(UUID id, double amount, boolean force) {
+        return addMoneyInternal(id.toString(), amount, force);
+    }
+
+    public int addMoney(String id, double amount) {
+        return this.addMoney(id, amount, false);
+    }
+
+    public int addMoney(String id, double amount, boolean force) {
+        Optional<UUID> uuid = getServer().lookupName(id);
+        if (uuid.isPresent()) {
+            checkAndConvertLegacy(uuid.get(), id);
+            return addMoney(uuid.get(), amount, force);
+        }
+        return addMoneyInternal(id, amount, force);
+    }
+
+    private int addMoneyInternal(String id, double amount, boolean force) {
+        id = id.toLowerCase();
+        if (amount < 0) {
+            return RET_INVALID;
+        }
+        AddMoneyEvent event = new AddMoneyEvent(id, amount);
+        this.getServer().getPluginManager().callEvent(event);
+        if (!event.isCancelled() || force) {
+            double money;
+            if ((money = this.provider.getMoney(id)) != -1) {
+                if (money + amount > this.getMaxMoney()) {
+                    return RET_INVALID;
+                } else {
+                    this.provider.addMoney(id, amount);
+                    return RET_SUCCESS;
+                }
+            } else {
+                return RET_NO_ACCOUNT;
+            }
+        }
+        return RET_CANCELLED;
+    }
+
+    public int reduceMoney(IPlayer player, double amount) {
+        return this.reduceMoney(player, amount, false);
+    }
+
+    public int reduceMoney(IPlayer player, double amount, boolean force) {
+        checkAndConvertLegacy(player.getUniqueId(), player.getName());
+        return this.reduceMoney(player.getUniqueId(), amount, force);
+    }
+
+    public int reduceMoney(UUID id, double amount) {
+        return this.reduceMoney(id, amount, false);
+    }
+
+    public int reduceMoney(UUID id, double amount, boolean force) {
+        return reduceMoneyInternal(id.toString(), amount, force);
+    }
+
+    public int reduceMoney(String id, double amount) {
+        return this.reduceMoney(id, amount, false);
+    }
+
+    public int reduceMoney(String id, double amount, boolean force) {
+        Optional<UUID> uuid = getServer().lookupName(id);
+        if (uuid.isPresent()) {
+            checkAndConvertLegacy(uuid.get(), id);
+            return reduceMoney(uuid.get(), amount, force);
+        }
+        return reduceMoneyInternal(id, amount, force);
+    }
+
+    private int reduceMoneyInternal(String id, double amount, boolean force) {
+        id = id.toLowerCase();
+        if (amount < 0) {
+            return RET_INVALID;
+        }
+
+        ReduceMoneyEvent event = new ReduceMoneyEvent(id, amount);
+        this.getServer().getPluginManager().callEvent(event);
+        if (!event.isCancelled() || force) {
+            amount = event.getAmount();
+
+            double money;
+            if ((money = this.provider.getMoney(id)) != -1) {
+                if (money - amount < 0) {
+                    return RET_INVALID;
+                } else {
+                    this.provider.reduceMoney(id, amount);
+                    return RET_SUCCESS;
+                }
+            } else {
+                return RET_NO_ACCOUNT;
+            }
+        }
+        return RET_CANCELLED;
+    }
+
+    public String getMessage(String key, String[] params, String player) { // TODO: Individual language
+        player = player.toLowerCase();
+
+        JSONObject obj = this.language.get("def");
+        if (obj.containsKey(key)) {
+            String message = obj.getAsString(key);
+
+            for (int i = 0; i < params.length; i++) {
+                message = message.replace("%" + (i + 1), params[i]);
+            }
+            return TextFormat.colorize(message.replace("%MONETARY_UNIT%", this.getMonetaryUnit()));
+        }
+        return "There are no message with key \"" + key + "\"";
+    }
+
+    public String getMessage(String key, String sender) {
+        return this.getMessage(key, new String[]{}, sender);
+    }
+
+    public String getMessage(String key, CommandSender sender) {
+        return this.getMessage(key, new String[]{}, sender);
+    }
+
+    public String getMessage(String key, String[] params, CommandSender player) {
+        return this.getMessage(key, params, player.getName());
+    }
+
+    public String getMonetaryUnit() {
+        return this.getConfig().get("money.monetary-unit", "$");
+    }
+
+    public double getDefaultMoney() {
+        if (this.getConfig().isDouble("money.default")) {
+            return this.getConfig().get("money.default", 1000D);
+        } else if (this.getConfig().isLong("money.default")) {
+            return this.getConfig().getLong("money.default", 1000);
+        }
+        return 1000;
+    }
+
+    public double getMaxMoney() {
+        if (this.getConfig().isDouble("money.max")) {
+            return this.getConfig().get("money.max", 9999999999D);
+        } else if (this.getConfig().isLong("money.max")) {
+            return this.getConfig().getLong("money.max", 9999999999L);
+        }
+        return 9999999999D;
+    }
+
+    public void saveAll() {
+        if (this.provider instanceof Provider) {
+            this.provider.save();
+        }
+    }
+
+    public void onLoad() {
+        instance = this;
+
+        this.addProvider("yaml", YamlProvider.class);
+    }
+
+    public void onEnable() {
+        this.saveDefaultConfig();
+
+        boolean success = this.initialize();
+
+        if (success) {
+            this.getServer().getPluginManager().registerEvents(this, this);
+            this.getServer().getScheduler().scheduleDelayedRepeatingTask(new AutoSaveTask(this), this.getConfig().get("data.auto-save-interval", 10) * 1200, this.getConfig().get("data.auto-save-interval", 10) * 1200);
+        }
+    }
+
+    @EventHandler
+    public void onJoin(PlayerJoinEvent event) {
+        this.createAccount(event.getPlayer());
+    }
+
+    public void onDisable() {
+        this.saveAll();
+    }
+
+    private boolean initialize() {
+        this.importLanguages();
+        this.registerCommands();
+        return this.selectProvider();
+    }
+
+    private void registerCommands() {
+        this.getServer().getCommandMap().register("economy", new MyMoneyCommand(this));
+        this.getServer().getCommandMap().register("economy", new TopMoneyCommand(this));
+        this.getServer().getCommandMap().register("economy", new GiveMoneyCommand(this));
+        this.getServer().getCommandMap().register("economy", new TakeMoneyCommand(this));
+        this.getServer().getCommandMap().register("economy", new PayCommand(this));
+        this.getServer().getCommandMap().register("economy", new SetMoneyCommand(this));
+    }
+
+    private boolean selectProvider() {
+        Class<?> providerClass = this.providerClass.get((this.getConfig().get("data.provider", "yaml")).toLowerCase());
+
+        if (providerClass == null) {
+            this.getLogger().critical("Invalid data provider was given.");
+            return false;
+        }
+
+        try {
+            this.provider = (Provider) providerClass.newInstance();
+            this.provider.init(this.getDataFolder());
+        } catch (InstantiationException | IllegalAccessException e) {
+            this.getLogger().critical("Invalid data provider was given.");
+            return false;
+        }
+
+        this.provider.open();
+
+        this.getLogger().notice("Data provider was set to: " + provider.getName());
+        return true;
+    }
+
+    public boolean addProvider(String name, Class<? extends Provider> providerClass) {
+        this.providerClass.put(name, providerClass);
+        return true;
+    }
+
+    private void importLanguages() {
+        this.language = new HashMap<>();
+
+        for (String lang : langList) {
+            InputStream is = this.getResource("lang_" + lang + ".json");
+            try {
+                JSONObject obj = (JSONObject) JSONValue.parse(Utils.readFile(is));
+                this.language.put(lang, obj);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    private void checkAndConvertLegacy(UUID uuid, String name) {
+        if (!provider.accountExists(name)) {
+            return;
+        }
+
+        if (provider.accountExists(uuid.toString())) {
+            provider.removeAccount(name);
+            return;
+        }
+
+        double money = provider.getMoney(name);
+        provider.createAccount(uuid.toString(), money);
+        provider.removeAccount(name);
+    }
 }

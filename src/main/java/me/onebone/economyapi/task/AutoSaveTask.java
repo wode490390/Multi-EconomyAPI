@@ -18,16 +18,15 @@ package me.onebone.economyapi.task;
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import cn.nukkit.scheduler.PluginTask;
 import me.onebone.economyapi.EconomyAPI;
 
-import cn.nukkit.scheduler.PluginTask;
+public class AutoSaveTask extends PluginTask<EconomyAPI> {
+    public AutoSaveTask(EconomyAPI owner) {
+        super(owner);
+    }
 
-public class AutoSaveTask extends PluginTask<EconomyAPI>{
-	public AutoSaveTask(EconomyAPI owner){
-		super(owner);
-	}
-	
-	public void onRun(int currentTick){
-		(this.getOwner()).saveAll();
-	}
+    public void onRun(int currentTick) {
+        (this.getOwner()).saveAll();
+    }
 }

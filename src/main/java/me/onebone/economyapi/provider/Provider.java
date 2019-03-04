@@ -18,38 +18,34 @@ package me.onebone.economyapi.provider;
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import cn.nukkit.IPlayer;
-import cn.nukkit.Player;
-
 import java.io.File;
 import java.util.LinkedHashMap;
-import java.util.UUID;
 
 public interface Provider {
-	void init(File path);
-	
-	void open();
-	void save();
-	void close();
-	
-	boolean accountExists(UUID player);
-	boolean accountExists(String player);
 
-	boolean removeAccount(UUID player);
-	boolean removeAccount(String player);
+    void init(File path);
 
-	boolean createAccount(UUID player, double defaultMoney);
-	
-	boolean setMoney(UUID player, double amount);
-	
-	boolean addMoney(UUID player, double amount);
-	
-	boolean reduceMoney(UUID player, double amount);
-	
-	double getMoney(UUID player);
-	double getMoney(String player);
-	
-	LinkedHashMap<String, Double> getAll();
-	
-	String getName();
+    void open();
+
+    void save();
+
+    void close();
+
+    boolean accountExists(String id);
+
+    boolean removeAccount(String id);
+
+    boolean createAccount(String id, double defaultMoney);
+
+    boolean setMoney(String id, double amount);
+
+    boolean addMoney(String id, double amount);
+
+    boolean reduceMoney(String id, double amount);
+
+    double getMoney(String id);
+
+    LinkedHashMap<String, Double> getAll();
+
+    String getName();
 }
