@@ -295,6 +295,18 @@ public class EconomyAPI extends PluginBase implements Listener {
         return RET_CANCELLED;
     }
 
+    public boolean hasAccount(IPlayer player) {
+        return hasAccount(player.getUniqueId());
+    }
+
+    public boolean hasAccount(UUID id) {
+        return hasAccount(id.toString());
+    }
+
+    public boolean hasAccount(String id) {
+        return provider.accountExists(id);
+    }
+
     public String getMessage(String key, String[] params, String player) { // TODO: Individual language
         player = player.toLowerCase();
 
