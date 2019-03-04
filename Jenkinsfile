@@ -10,17 +10,11 @@ pipeline {
     stages {
         stage ('Build') {
             steps {
-                sh 'mvn clean package javadoc:javadoc'
+                sh 'mvn clean package'
             }
             post {
                 success {
-                    junit 'target/surefire-reports/**/*.xml'
-                    archiveArtifacts artifacts: 'target/nukkit-*-SNAPSHOT.jar', fingerprint: true
-                    step([
-                        $class: 'JavadocArchiver',
-                        javadocDir: 'target/site/apidocs',
-                        keepAll: true
-                    ])
+                    archiveArtifacts artifacts: 'target/EconomyAPI.jar', fingerprint: true
                 }
             }
         }
@@ -30,8 +24,14 @@ pipeline {
                 branch "master"
             }
             steps {
-                sh 'mvn deploy -DskipTests'
+                sh 'mvn javadoc:jar source:jar deploy -DskipTests'
             }
+        }
+    }
+
+    post {
+        always {
+            deleteDir()
         }
     }
 }

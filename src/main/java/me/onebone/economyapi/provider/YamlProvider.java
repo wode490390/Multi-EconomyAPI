@@ -20,11 +20,12 @@ package me.onebone.economyapi.provider;
 
 import java.io.File;
 import java.util.LinkedHashMap;
+import java.util.UUID;
 
 import cn.nukkit.Player;
 import cn.nukkit.utils.Config;
 
-public class YamlProvider implements Provider{
+public class YamlProvider implements Provider {
 	private Config file = null;
 	private LinkedHashMap<String, Double> data = null;
 	
@@ -68,76 +69,78 @@ public class YamlProvider implements Provider{
 		file = null;
 		data = null;
 	}
-	
-	public boolean accountExists(Player player){
-		return this.accountExists(player.getName());
+
+	@Override
+	public boolean accountExists(UUID player) {
+		return accountExists(player.toString());
 	}
-	
+
+	@Override
 	public boolean accountExists(String player){
 		player = player.toLowerCase();
 		
 		return data.containsKey(player);
 	}
-	
-	public boolean createAccount(Player player, double defaultMoney){
-		return this.createAccount(player.getName(), defaultMoney);
+
+	@Override
+	public boolean removeAccount(UUID player) {
+		return removeAccount(player.toString());
 	}
-	
-	public boolean createAccount(String player, double defaultMoney){
-		player = player.toLowerCase();
-		
+
+	@Override
+	public boolean removeAccount(String player) {
+		if (accountExists(player)) {
+			data.remove(player);
+			return true;
+		}
+		return false;
+	}
+
+	@Override
+	public boolean createAccount(UUID player, double defaultMoney) {
 		if(!this.accountExists(player)){
-			data.put(player, defaultMoney);
+			data.put(player.toString(), defaultMoney);
 		}
 		return false;
 	}
 
-	public boolean setMoney(String player, double amount){
-		player = player.toLowerCase();
-		
-		if(data.containsKey(player)){
-			data.put(player, amount);
+	@Override
+	public boolean setMoney(UUID player, double amount){
+		if(data.containsKey(player.toString())){
+			data.put(player.toString(), amount);
 			return true;
 		}
 		return false;
 	}
 
-	public boolean setMoney(Player player, double amount){
-		return this.setMoney(player.getName(), amount);
-	}
 
-	public boolean addMoney(String player, double amount){
-		player = player.toLowerCase();
-		
-		if(data.containsKey(player)){
-			data.put(player, data.get(player) + amount);
+	@Override
+	public boolean addMoney(UUID player, double amount) {
+		if(data.containsKey(player.toString())){
+			data.put(player.toString(), data.get(player.toString()) + amount);
 			return true;
 		}
 		return false;
 	}
 
-	public boolean addMoney(Player player, double amount){
-		return this.addMoney(player.getName(), amount);
-	}
-
-	public boolean reduceMoney(String player, double amount){
-		player = player.toLowerCase();
-		
-		if(data.containsKey(player)){
-			data.put(player, data.get(player) - amount);
+	@Override
+	public boolean reduceMoney(UUID player, double amount) {
+		if(data.containsKey(player.toString())){
+			data.put(player.toString(), data.get(player.toString()) - amount);
 			return true;
 		}
 		return false;
 	}
 
-	public boolean reduceMoney(Player player, double amount){
-		return this.reduceMoney(player.getName(), amount);
+	@Override
+	public double getMoney(UUID player) {
+		if(data.containsKey(player.toString())){
+			return data.get(player.toString());
+		}
+		return -1;
 	}
-	
-	public double getMoney(Player player){
-		return this.getMoney(player.getName());
-	}
-	
+
+	@Override
 	public double getMoney(String player){
 		player = player.toLowerCase();
 		if(data.containsKey(player)){

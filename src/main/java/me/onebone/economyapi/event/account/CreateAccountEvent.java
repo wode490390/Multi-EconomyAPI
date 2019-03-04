@@ -22,18 +22,20 @@ import cn.nukkit.event.Cancellable;
 import cn.nukkit.event.Event;
 import cn.nukkit.event.HandlerList;
 
+import java.util.UUID;
+
 public class CreateAccountEvent extends Event implements Cancellable{
 	public static HandlerList handlerList = new HandlerList();
 	
-	private String player;
+	private UUID player;
 	private double defaultMoney;
 	
-	public CreateAccountEvent(String player, double defaultMoney){
+	public CreateAccountEvent(UUID player, double defaultMoney){
 		this.player = player;
 		this.defaultMoney = defaultMoney;
 	}
 	
-	public String getPlayer(){
+	public UUID getPlayer(){
 		return this.player;
 	}
 	

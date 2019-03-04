@@ -1,7 +1,7 @@
 name: EconomyAPI
-version: @VERSION@
+version: ${project.version}
 author: onebone
-api: ["1.0.0"]
+api: ["1.0.8"]
 main: me.onebone.economyapi.EconomyAPI
 
 permissions:

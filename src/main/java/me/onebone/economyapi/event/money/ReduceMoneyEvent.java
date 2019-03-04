@@ -22,18 +22,20 @@ import cn.nukkit.event.Cancellable;
 import cn.nukkit.event.Event;
 import cn.nukkit.event.HandlerList;
 
+import java.util.UUID;
+
 public class ReduceMoneyEvent extends Event implements Cancellable{
 	public static HandlerList handlerList = new HandlerList();
 	
-	private String player;
+	private UUID player;
 	private double amount;
 	
-	public ReduceMoneyEvent(String player, double amount){
+	public ReduceMoneyEvent(UUID player, double amount){
 		this.player = player;
 		this.amount = amount;
 	}
 	
-	public String getPlayer(){
+	public UUID getPlayer(){
 		return this.player;
 	}
 	
