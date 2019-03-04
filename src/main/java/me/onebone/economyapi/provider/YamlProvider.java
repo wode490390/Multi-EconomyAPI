@@ -33,7 +33,8 @@ public class YamlProvider implements Provider {
         file.set("version", 2);
         file.set("money", new LinkedHashMap<String, Double>());
 
-        LinkedHashMap<String, Object> temp = file.getSection("money");
+        LinkedHashMap<String, Object> temp = (LinkedHashMap) file.getRootSection()
+                .computeIfAbsent("money", s -> new LinkedHashMap<>());
 
         data = new LinkedHashMap<>();
         temp.forEach((username, money) -> {
