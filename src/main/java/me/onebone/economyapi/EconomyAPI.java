@@ -19,6 +19,7 @@ package me.onebone.economyapi;
  */
 
 import cn.nukkit.IPlayer;
+import cn.nukkit.Player;
 import cn.nukkit.command.CommandSender;
 import cn.nukkit.event.EventHandler;
 import cn.nukkit.event.Listener;
@@ -63,8 +64,20 @@ public class EconomyAPI extends PluginBase implements Listener {
         return instance;
     }
 
+    public boolean createAccount(Player player) {
+        return this.createAccount(player, -1);
+    }
+
+    public boolean createAccount(Player player, double defaultMoney) {
+        return this.createAccount(player, defaultMoney, false);
+    }
+
+    public boolean createAccount(Player player, double defaultMoney, boolean force) {
+        return this.createAccount(player.getUniqueId(), defaultMoney, force);
+    }
+
     public boolean createAccount(IPlayer player) {
-        return this.createAccount(player, -1, false);
+        return this.createAccount(player, -1);
     }
 
     public boolean createAccount(IPlayer player, double defaultMoney) {
@@ -80,11 +93,12 @@ public class EconomyAPI extends PluginBase implements Listener {
     }
 
     public boolean createAccount(UUID id, double defaultMoney, boolean force) {
-        return createAccount(id.toString(), defaultMoney, force);
+        checkAndConvertLegacy(id);
+        return createAccountInternal(id.toString(), defaultMoney, force);
     }
 
     public boolean createAccount(String id, double defaultMoney, boolean force) {
-        Optional<UUID> uuid = getServer().lookupName(id);
+        Optional<UUID> uuid = checkAndConvertLegacy(id);
         return uuid.map(uuid1 -> createAccount(uuid1, defaultMoney, force))
                 .orElse(createAccountInternal(id, defaultMoney, force));
     }
@@ -109,26 +123,34 @@ public class EconomyAPI extends PluginBase implements Listener {
      * @param player
      * @return Money of player. -1 if player does not exist.
      */
+    public double myMoney(Player player) {
+        return this.myMoney(player.getUniqueId());
+    }
+
     public double myMoney(IPlayer player) {
-        checkAndConvertLegacy(player.getUniqueId(), player.getName());
         return this.myMoney(player.getUniqueId());
     }
 
     public double myMoney(UUID id) {
+        checkAndConvertLegacy(id);
         return myMoneyInternal(id.toString());
     }
 
     public double myMoney(String id) {
-        Optional<UUID> uuid = getServer().lookupName(id);
-        if (uuid.isPresent()) {
-            checkAndConvertLegacy(uuid.get(), id);
-            return myMoney(uuid.get());
-        }
-        return myMoneyInternal(id);
+        Optional<UUID> uuid = checkAndConvertLegacy(id);
+        return uuid.map(this::myMoney).orElse(myMoneyInternal(id));
     }
 
     private double myMoneyInternal(String id) {
         return this.provider.getMoney(id.toLowerCase());
+    }
+
+    public int setMoney(Player player, double amount) {
+        return this.setMoney(player, amount, false);
+    }
+
+    public int setMoney(Player player, double amount, boolean force) {
+        return this.setMoney(player.getUniqueId(), amount, force);
     }
 
     public int setMoney(IPlayer player, double amount) {
@@ -136,7 +158,6 @@ public class EconomyAPI extends PluginBase implements Listener {
     }
 
     public int setMoney(IPlayer player, double amount, boolean force) {
-        checkAndConvertLegacy(player.getUniqueId(), player.getName());
         return this.setMoney(player.getUniqueId(), amount, force);
     }
 
@@ -145,6 +166,7 @@ public class EconomyAPI extends PluginBase implements Listener {
     }
 
     public int setMoney(UUID id, double amount, boolean force) {
+        checkAndConvertLegacy(id);
         return setMoneyInternal(id.toString(), amount, force);
     }
 
@@ -153,12 +175,9 @@ public class EconomyAPI extends PluginBase implements Listener {
     }
 
     public int setMoney(String id, double amount, boolean force) {
-        Optional<UUID> uuid = getServer().lookupName(id);
-        if (uuid.isPresent()) {
-            checkAndConvertLegacy(uuid.get(), id);
-            return setMoney(uuid.get(), amount, force);
-        }
-        return setMoneyInternal(id, amount, force);
+        Optional<UUID> uuid = checkAndConvertLegacy(id);
+        return uuid.map(uuid1 -> setMoney(uuid1, amount, force))
+                .orElse(setMoneyInternal(id, amount, force));
     }
 
     private int setMoneyInternal(String id, double amount, boolean force) {
@@ -186,12 +205,19 @@ public class EconomyAPI extends PluginBase implements Listener {
         return RET_CANCELLED;
     }
 
+    public int addMoney(Player player, double amount) {
+        return this.addMoney(player, amount, false);
+    }
+
+    public int addMoney(Player player, double amount, boolean force) {
+        return this.addMoney(player.getUniqueId(), amount, force);
+    }
+
     public int addMoney(IPlayer player, double amount) {
         return this.addMoney(player, amount, false);
     }
 
     public int addMoney(IPlayer player, double amount, boolean force) {
-        checkAndConvertLegacy(player.getUniqueId(), player.getName());
         return this.addMoney(player.getUniqueId(), amount, force);
     }
 
@@ -200,6 +226,7 @@ public class EconomyAPI extends PluginBase implements Listener {
     }
 
     public int addMoney(UUID id, double amount, boolean force) {
+        checkAndConvertLegacy(id);
         return addMoneyInternal(id.toString(), amount, force);
     }
 
@@ -208,12 +235,9 @@ public class EconomyAPI extends PluginBase implements Listener {
     }
 
     public int addMoney(String id, double amount, boolean force) {
-        Optional<UUID> uuid = getServer().lookupName(id);
-        if (uuid.isPresent()) {
-            checkAndConvertLegacy(uuid.get(), id);
-            return addMoney(uuid.get(), amount, force);
-        }
-        return addMoneyInternal(id, amount, force);
+        Optional<UUID> uuid = checkAndConvertLegacy(id);
+        return uuid.map(uuid1 -> addMoney(uuid1, amount, force))
+                .orElse(addMoneyInternal(id, amount, force));
     }
 
     private int addMoneyInternal(String id, double amount, boolean force) {
@@ -239,12 +263,19 @@ public class EconomyAPI extends PluginBase implements Listener {
         return RET_CANCELLED;
     }
 
+    public int reduceMoney(Player player, double amount) {
+        return this.reduceMoney(player, amount, false);
+    }
+
+    public int reduceMoney(Player player, double amount, boolean force) {
+        return this.reduceMoney(player.getUniqueId(), amount, force);
+    }
+
     public int reduceMoney(IPlayer player, double amount) {
         return this.reduceMoney(player, amount, false);
     }
 
     public int reduceMoney(IPlayer player, double amount, boolean force) {
-        checkAndConvertLegacy(player.getUniqueId(), player.getName());
         return this.reduceMoney(player.getUniqueId(), amount, force);
     }
 
@@ -253,6 +284,7 @@ public class EconomyAPI extends PluginBase implements Listener {
     }
 
     public int reduceMoney(UUID id, double amount, boolean force) {
+        checkAndConvertLegacy(id);
         return reduceMoneyInternal(id.toString(), amount, force);
     }
 
@@ -261,12 +293,9 @@ public class EconomyAPI extends PluginBase implements Listener {
     }
 
     public int reduceMoney(String id, double amount, boolean force) {
-        Optional<UUID> uuid = getServer().lookupName(id);
-        if (uuid.isPresent()) {
-            checkAndConvertLegacy(uuid.get(), id);
-            return reduceMoney(uuid.get(), amount, force);
-        }
-        return reduceMoneyInternal(id, amount, force);
+        Optional<UUID> uuid = checkAndConvertLegacy(id);
+        return uuid.map(uuid1 -> reduceMoney(uuid1, amount, force))
+                .orElse(reduceMoneyInternal(id, amount, force));
     }
 
     private int reduceMoneyInternal(String id, double amount, boolean force) {
@@ -444,7 +473,21 @@ public class EconomyAPI extends PluginBase implements Listener {
         }
     }
 
+    private void checkAndConvertLegacy(UUID uuid) {
+        IPlayer player = getServer().getOfflinePlayer(uuid);
+        if (player != null && player.getName() != null) {
+            checkAndConvertLegacy(uuid, player.getName());
+        }
+    }
+
+    private Optional<UUID> checkAndConvertLegacy(String id) {
+        Optional<UUID> uuid = getServer().lookupName(id);
+        uuid.ifPresent(uuid1 -> checkAndConvertLegacy(uuid1, id));
+        return uuid;
+    }
+
     private void checkAndConvertLegacy(UUID uuid, String name) {
+        name = name.toLowerCase();
         if (!provider.accountExists(name)) {
             return;
         }
