@@ -90,7 +90,7 @@ public class TopMoneyCommand extends Command {
 
         IPlayer player = Server.getInstance().getOfflinePlayer(uuid);
         if (player != null && player.getName() != null) {
-            return possibleUuid;
+            return player.getName();
         }
         return possibleUuid;
     }
