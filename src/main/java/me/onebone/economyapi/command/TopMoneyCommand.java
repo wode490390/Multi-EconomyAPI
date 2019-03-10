@@ -18,15 +18,14 @@ package me.onebone.economyapi.command;
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import cn.nukkit.IPlayer;
+import cn.nukkit.Server;
 import cn.nukkit.command.Command;
 import cn.nukkit.command.CommandSender;
 import cn.nukkit.utils.TextFormat;
 import me.onebone.economyapi.EconomyAPI;
 
-import java.util.LinkedHashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 public class TopMoneyCommand extends Command {
     private EconomyAPI plugin;
@@ -66,7 +65,7 @@ public class TopMoneyCommand extends Command {
                     prev = m;
                     int current = (int) Math.ceil((double) (n + 1) / 5);
                     if (page == current) {
-                        output.append(plugin.getMessage("topmoney-format", new String[]{Integer.toString(n + 1 - duplicate), list.get(n), Double.toString(m)}, sender)).append("\n");
+                        output.append(plugin.getMessage("topmoney-format", new String[]{Integer.toString(n + 1 - duplicate), getName(list.get(n)), Double.toString(m)}, sender)).append("\n");
                     } else if (page < current) {
                         break;
                     }
@@ -81,4 +80,18 @@ public class TopMoneyCommand extends Command {
         return true;
     }
 
+    private static String getName(String possibleUuid) {
+        UUID uuid;
+        try {
+            uuid = UUID.fromString(possibleUuid);
+        } catch (Exception e) {
+            return possibleUuid;
+        }
+
+        IPlayer player = Server.getInstance().getOfflinePlayer(uuid);
+        if (player != null && player.getName() != null) {
+            return possibleUuid;
+        }
+        return possibleUuid;
+    }
 }
