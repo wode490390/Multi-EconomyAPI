@@ -31,8 +31,8 @@ public class YamlProvider implements Provider {
     public void init(File path) {
         file = new Config(new File(path, "Money.yml"), Config.YAML);
         file.set("version", 2);
-        file.set("money", new LinkedHashMap<String, Double>());
 
+        //noinspection unchecked
         LinkedHashMap<String, Object> temp = (LinkedHashMap) file.getRootSection()
                 .computeIfAbsent("money", s -> new LinkedHashMap<>());
 

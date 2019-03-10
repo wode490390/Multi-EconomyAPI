@@ -36,6 +36,21 @@ public class TopMoneyCommand extends Command {
         this.plugin = plugin;
     }
 
+    private static String getName(String possibleUuid) {
+        UUID uuid;
+        try {
+            uuid = UUID.fromString(possibleUuid);
+        } catch (Exception e) {
+            return possibleUuid;
+        }
+
+        IPlayer player = Server.getInstance().getOfflinePlayer(uuid);
+        if (player != null && player.getName() != null) {
+            return player.getName();
+        }
+        return possibleUuid;
+    }
+
     @Override
     public boolean execute(final CommandSender sender, String label, final String[] args) {
         if (!this.plugin.isEnabled()) return false;
@@ -78,20 +93,5 @@ public class TopMoneyCommand extends Command {
             sender.sendMessage(TextFormat.RED + "Please provide a number.");
         }
         return true;
-    }
-
-    private static String getName(String possibleUuid) {
-        UUID uuid;
-        try {
-            uuid = UUID.fromString(possibleUuid);
-        } catch (Exception e) {
-            return possibleUuid;
-        }
-
-        IPlayer player = Server.getInstance().getOfflinePlayer(uuid);
-        if (player != null && player.getName() != null) {
-            return player.getName();
-        }
-        return possibleUuid;
     }
 }

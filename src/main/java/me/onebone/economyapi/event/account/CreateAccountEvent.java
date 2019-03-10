@@ -22,30 +22,30 @@ import cn.nukkit.event.Cancellable;
 import cn.nukkit.event.Event;
 import cn.nukkit.event.HandlerList;
 
-public class CreateAccountEvent extends Event implements Cancellable{
-	public static HandlerList handlerList = new HandlerList();
+public class CreateAccountEvent extends Event implements Cancellable {
+    public static HandlerList handlerList = new HandlerList();
 
-	private String player;
-	private double defaultMoney;
+    private String player;
+    private double defaultMoney;
 
-	public CreateAccountEvent(String player, double defaultMoney){
-		this.player = player;
-		this.defaultMoney = defaultMoney;
-	}
+    public CreateAccountEvent(String player, double defaultMoney) {
+        this.player = player;
+        this.defaultMoney = defaultMoney;
+    }
 
-	public String getPlayer(){
-		return this.player;
-	}
+    public static HandlerList getHandlers() {
+        return handlerList;
+    }
 
-	public double getDefaultMoney(){
-		return this.defaultMoney;
-	}
+    public String getPlayer() {
+        return this.player;
+    }
 
-	public void setDefaultMoney(double amount){
-		this.defaultMoney = amount;
-	}
+    public double getDefaultMoney() {
+        return this.defaultMoney;
+    }
 
-	public static HandlerList getHandlers(){
-		return handlerList;
-	}
+    public void setDefaultMoney(double amount) {
+        this.defaultMoney = amount;
+    }
 }
