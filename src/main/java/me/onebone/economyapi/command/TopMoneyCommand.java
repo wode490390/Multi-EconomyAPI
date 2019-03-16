@@ -71,12 +71,13 @@ public class TopMoneyCommand extends Command {
                 StringBuilder output = new StringBuilder();
                 output.append(plugin.getMessage("topmoney-tag", new String[]{Integer.toString(page), Integer.toString(((players.size() + 6) / 5))}, sender)).append("\n");
 
-                double total = 0;
-
-                for (double val : money.values()) {
-                    total += val;
+                if (page == 1) {
+                    double total = 0;
+                    for (double val : money.values()) {
+                        total += val;
+                    }
+                    output.append(plugin.getMessage("topmoney-total", new String[]{EconomyAPI.MONEY_FORMAT.format(total)}, sender)).append("\n\n");
                 }
-                output.append(plugin.getMessage("topmoney-total", new String[]{EconomyAPI.MONEY_FORMAT.format(total)}, sender));
 
                 int duplicate = 0;
                 double prev = -1D;
