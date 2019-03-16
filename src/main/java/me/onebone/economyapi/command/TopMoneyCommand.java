@@ -31,7 +31,7 @@ public class TopMoneyCommand extends Command {
     private EconomyAPI plugin;
 
     public TopMoneyCommand(EconomyAPI plugin) {
-        super("topmoney", "Shows top money of this server", "/topmoney [page]", new String[]{"baltop"});
+        super("topmoney", "Shows top money of this server", "/topmoney [page]", new String[]{"baltop", "balancetop"});
 
         this.plugin = plugin;
     }
@@ -70,6 +70,13 @@ public class TopMoneyCommand extends Command {
 
                 StringBuilder output = new StringBuilder();
                 output.append(plugin.getMessage("topmoney-tag", new String[]{Integer.toString(page), Integer.toString(((players.size() + 6) / 5))}, sender)).append("\n");
+
+                double total = 0;
+
+                for (double val : money.values()) {
+                    total += val;
+                }
+                output.append(plugin.getMessage("topmoney-total", new String[]{EconomyAPI.MONEY_FORMAT.format(total)}, sender));
 
                 int duplicate = 0;
                 double prev = -1D;

@@ -30,7 +30,7 @@ public class SetMoneyCommand extends Command {
     private EconomyAPI plugin;
 
     public SetMoneyCommand(EconomyAPI plugin) {
-        super("setmoney", "Set money of player", "/setmoney <player> <amount>");
+        super("setmoney", "Set player's balance", "/setmoney <player> <amount>", new String[]{"setbal", "setbalance"});
 
         this.plugin = plugin;
 

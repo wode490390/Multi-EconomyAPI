@@ -31,7 +31,7 @@ public class MyMoneyCommand extends Command {
     private EconomyAPI plugin;
 
     public MyMoneyCommand(EconomyAPI plugin) {
-        super("mymoney", "Shows your money", "/money", new String[]{"money", "bal", "seemoney"});
+        super("mymoney", "Shows your money", "/money", new String[]{"money", "bal", "seemoney", "balance"});
 
         this.plugin = plugin;
 
