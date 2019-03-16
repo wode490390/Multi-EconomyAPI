@@ -70,7 +70,8 @@ public class TakeMoneyCommand extends Command {
             int result = this.plugin.reduceMoney(player, amount);
             switch (result) {
                 case EconomyAPI.RET_INVALID:
-                    sender.sendMessage(this.plugin.getMessage("takemoney-player-lack-of-money", new String[]{player, Double.toString(amount), Double.toString(this.plugin.myMoney(player))}, sender));
+                    sender.sendMessage(this.plugin.getMessage("takemoney-player-lack-of-money", new String[]{player,
+                            EconomyAPI.MONEY_FORMAT.format(amount), EconomyAPI.MONEY_FORMAT.format(this.plugin.myMoney(player))}, sender));
                     return true;
                 case EconomyAPI.RET_NO_ACCOUNT:
                     sender.sendMessage(this.plugin.getMessage("player-never-connected", new String[]{player}, sender));
@@ -79,9 +80,9 @@ public class TakeMoneyCommand extends Command {
                     sender.sendMessage(this.plugin.getMessage("takemoney-failed", new String[]{player}, sender));
                     return true;
                 case EconomyAPI.RET_SUCCESS:
-                    sender.sendMessage(this.plugin.getMessage("takemoney-took-money", new String[]{player, Double.toString(amount)}, sender));
+                    sender.sendMessage(this.plugin.getMessage("takemoney-took-money", new String[]{player, EconomyAPI.MONEY_FORMAT.format(amount)}, sender));
                     if (p != null) {
-                        p.sendMessage(this.plugin.getMessage("takemoney-money-taken", new String[]{Double.toString(amount)}, sender));
+                        p.sendMessage(this.plugin.getMessage("takemoney-money-taken", new String[]{EconomyAPI.MONEY_FORMAT.format(amount)}, sender));
                     }
                     return true;
             }

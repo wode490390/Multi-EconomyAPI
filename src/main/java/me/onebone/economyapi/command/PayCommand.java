@@ -80,9 +80,9 @@ public class PayCommand extends Command {
                 case EconomyAPI.RET_SUCCESS:
                     this.plugin.addMoney(player, amount, true);
 
-                    sender.sendMessage(this.plugin.getMessage("pay-success", new String[]{Double.toString(amount), player}, sender));
+                    sender.sendMessage(this.plugin.getMessage("pay-success", new String[]{EconomyAPI.MONEY_FORMAT.format(amount), player}, sender));
                     if (p != null) {
-                        p.sendMessage(this.plugin.getMessage("money-paid", new String[]{sender.getName(), Double.toString(amount)}, sender));
+                        p.sendMessage(this.plugin.getMessage("money-paid", new String[]{sender.getName(), EconomyAPI.MONEY_FORMAT.format(amount)}, sender));
                     }
                     return true;
             }

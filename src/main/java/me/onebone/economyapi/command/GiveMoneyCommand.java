@@ -70,15 +70,15 @@ public class GiveMoneyCommand extends Command {
             int result = this.plugin.addMoney(player, amount);
             switch (result) {
                 case EconomyAPI.RET_INVALID:
-                    sender.sendMessage(this.plugin.getMessage("reached-max", new String[]{Double.toString(amount)}, sender));
+                    sender.sendMessage(this.plugin.getMessage("reached-max", new String[]{EconomyAPI.MONEY_FORMAT.format(amount)}, sender));
                     return true;
                 case EconomyAPI.RET_NO_ACCOUNT:
                     sender.sendMessage(this.plugin.getMessage("player-never-connected", new String[]{player}, sender));
                     return true;
                 case EconomyAPI.RET_SUCCESS:
-                    sender.sendMessage(this.plugin.getMessage("givemoney-gave-money", new String[]{Double.toString(amount), player}, sender));
+                    sender.sendMessage(this.plugin.getMessage("givemoney-gave-money", new String[]{EconomyAPI.MONEY_FORMAT.format(amount), player}, sender));
                     if (p != null) {
-                        p.sendMessage(this.plugin.getMessage("givemoney-money-given", new String[]{Double.toString(amount)}, sender));
+                        p.sendMessage(this.plugin.getMessage("givemoney-money-given", new String[]{EconomyAPI.MONEY_FORMAT.format(amount)}, sender));
                     }
                     return true;
             }
