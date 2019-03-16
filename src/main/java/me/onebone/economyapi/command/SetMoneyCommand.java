@@ -80,7 +80,7 @@ public class SetMoneyCommand extends Command {
                     return true;
                 case EconomyAPI.RET_SUCCESS:
                     sender.sendMessage(this.plugin.getMessage("setmoney-setmoney", new String[]{player, Double.toString(amount)}, sender));
-                    if (p instanceof Player) {
+                    if (p != null) {
                         p.sendMessage(this.plugin.getMessage("setmoney-set", new String[]{Double.toString(amount)}, sender));
                     }
                     return true;

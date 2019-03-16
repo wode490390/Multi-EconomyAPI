@@ -40,6 +40,7 @@ import net.minidev.json.JSONValue;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.text.DecimalFormat;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Optional;
@@ -51,10 +52,15 @@ public class EconomyAPI extends PluginBase implements Listener {
     public static final int RET_NOT_FOUND = -1;
     public static final int RET_INVALID = 0;
     public static final int RET_SUCCESS = 1;
+    public static final DecimalFormat MONEY_FORMAT = new DecimalFormat();
     private static EconomyAPI instance;
     private Provider provider;
     private HashMap<String, JSONObject> language = null;
     private HashMap<String, Class<?>> providerClass = new HashMap<>();
+
+    static {
+        MONEY_FORMAT.setMaximumFractionDigits(2);
+    }
 
     private String[] langList = new String[]{
             "ch", "cs", "def", "fr", "id", "it", "jp", "ko", "nl", "ru", "zh"

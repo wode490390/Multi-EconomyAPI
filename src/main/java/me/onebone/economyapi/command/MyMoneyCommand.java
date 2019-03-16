@@ -64,7 +64,7 @@ public class MyMoneyCommand extends Command {
             }
         }
 
-        String money = String.valueOf(this.plugin.myMoney(player));
+        String money = EconomyAPI.MONEY_FORMAT.format(this.plugin.myMoney(player));
         if (sender == player) {
             sender.sendMessage(this.plugin.getMessage("mymoney-mymoney", new String[]{money}, player.getName()));
         } else {

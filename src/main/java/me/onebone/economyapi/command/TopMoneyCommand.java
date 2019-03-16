@@ -80,7 +80,7 @@ public class TopMoneyCommand extends Command {
                     prev = m;
                     int current = (int) Math.ceil((double) (n + 1) / 5);
                     if (page == current) {
-                        output.append(plugin.getMessage("topmoney-format", new String[]{Integer.toString(n + 1 - duplicate), getName(list.get(n)), Double.toString(m)}, sender)).append("\n");
+                        output.append(plugin.getMessage("topmoney-format", new String[]{Integer.toString(n + 1 - duplicate), getName(list.get(n)), EconomyAPI.MONEY_FORMAT.format(m)}, sender)).append("\n");
                     } else if (page < current) {
                         break;
                     }
