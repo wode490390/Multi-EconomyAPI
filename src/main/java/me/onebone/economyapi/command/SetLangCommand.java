@@ -18,36 +18,43 @@ package me.onebone.economyapi.command;
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import me.onebone.economyapi.EconomyAPI;
-
 import cn.nukkit.command.Command;
 import cn.nukkit.command.CommandSender;
+import cn.nukkit.command.data.CommandParamType;
+import cn.nukkit.command.data.CommandParameter;
 import cn.nukkit.utils.TextFormat;
+import me.onebone.economyapi.EconomyAPI;
 
-public class SetLangCommand extends Command{
-	private EconomyAPI plugin;
-	
-	public SetLangCommand(EconomyAPI plugin) {
-		super("setlang", "Sets your preferred language", "/setlang <ccTLD>");
-		
-		this.plugin = plugin;
-	}
+public class SetLangCommand extends Command {
+    private EconomyAPI plugin;
 
-	@Override
-	public boolean execute(CommandSender sender, String label, String[] args) {
-		if(!this.plugin.isEnabled()) return false;
-		if(!sender.hasPermission("economyapi.command.setlang")){
-			sender.sendMessage(TextFormat.RED + "You don't have permission to use this command.");
-			return false;
-		}
-		
-		if(args.length < 1){
-			sender.sendMessage(TextFormat.RED + "Usage: " + this.getUsage());
-			return true;
-		}
-		String lang = args[0];
-		
-		// TODO
-		return true;
-	}
+    public SetLangCommand(EconomyAPI plugin) {
+        super("setlang", "Sets your preferred language", "/setlang <ccTLD>");
+
+        this.plugin = plugin;
+
+        // command parameters
+        commandParameters.clear();
+        commandParameters.put("default", new CommandParameter[]{
+                new CommandParameter("ccTLD", CommandParamType.STRING, false)
+        });
+    }
+
+    @Override
+    public boolean execute(CommandSender sender, String label, String[] args) {
+        if (!this.plugin.isEnabled()) return false;
+        if (!sender.hasPermission("economyapi.command.setlang")) {
+            sender.sendMessage(TextFormat.RED + "You don't have permission to use this command.");
+            return false;
+        }
+
+        if (args.length < 1) {
+            sender.sendMessage(TextFormat.RED + "Usage: " + this.getUsage());
+            return true;
+        }
+        String lang = args[0];
+
+        // TODO
+        return true;
+    }
 }
